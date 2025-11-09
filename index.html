@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专属提示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: white; /* 白色背景 */
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* 初始提示窗口样式 */
+        #single-tip {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 120px;
+            background-color: lightpink;
+            border: 2px solid #ff69b4;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        .tip-content {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        /* 批量提示窗口样式 */
+        .tip-window {
+            position: fixed;
+            width: 350px;
+            height: 120px;
+            border: 2px solid;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .tip-window:hover {
+            transform: scale(1.05);
+        }
+
+        /* 背景颜色类 */
+        .bg-lightpink { background-color: lightpink; border-color: #ff69b4; }
+        .bg-skyblue { background-color: skyblue; border-color: #87ceeb; }
+        .bg-lightgreen { background-color: lightgreen; border-color: #90ee90; }
+        .bg-lavender { background-color: lavender; border-color: #e6e6fa; }
+        .bg-lightyellow { background-color: lightyellow; border-color: #ffffe0; }
+        .bg-plum { background-color: plum; border-color: #dda0dd; }
+        .bg-coral { background-color: coral; border-color: #ff7f50; }
+        .bg-bisque { background-color: bisque; border-color: #ffe4c4; }
+        .bg-aquamarine { background-color: aquamarine; border-color: #7fffd4; }
+
+        /* 关闭提示 */
+        .close-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1001;
+            animation: fadeInOut 2s infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 初始提示窗口 -->
+    <div id="single-tip" onclick="startBatchTips()">
+        <div class="tip-content">陆沉，我的名字。</div>
+    </div>
+
+    <!-- 关闭提示 -->
+    <div class="close-hint" id="closeHint" style="display: none;">
+        点击任意位置或按ESC键关闭所有提示
+    </div>
+
+    <script>
+        // 提示语数组
+        const tips = [
+            '这个冬天比以往更冷了，不过你来了，我就暖和了。',
+            '我有一个让今天变特别的方法。',
+            '我爱你，我是说我爱你。',
+            '原来爱是坠落，是在黄昏的缝隙，当所有意义开始流浪的时候，你抱住了我，让我踏实。',
+            '原则上我不会阻挡你做任何事，但我会陪在你身旁。',
+            '在冬天拾起枯叶时，也想起我吧。',
+            '愿我的小姑娘，所得皆所念，所行化归途。',
+            '让我和你在欲念中沉沦，直到死亡的火光将我们吞没。',
+            '只要你相信，我就是你的咒语。',
+            '无论你选择在我面前做什么样的人，我都会珍视那份心情。',
+            '你永远都有拒绝的权利。',
+            '只要你在，晴天或是雨天，黄昏都是最好的黄昏。',
+            '现在抱着你，就是最简单的快乐。',
+            '你赐予我欲望与欢愉，让我心生贪恋',
+            '兔子小姐，我爱你。'
+        ];
+
+        // 背景颜色数组
+        const bgColors = [
+            'lightpink', 'skyblue', 'lightgreen', 'lavender',
+            'lightyellow', 'plum', 'coral', 'bisque', 'aquamarine'
+        ];
+
+        let batchWindows = [];
+
+        function startBatchTips() {
+            // 隐藏初始提示窗口
+            const singleTip = document.getElementById('single-tip');
+            singleTip.style.display = 'none';
+
+            // 显示关闭提示
+            const closeHint = document.getElementById('closeHint');
+            closeHint.style.display = 'block';
+
+            // 创建批量提示窗口
+            createBatchWindows(30); // 创建30个窗口，可以根据需要调整数量
+        }
+
+        function createBatchWindows(count) {
+            if (count <= 0) return;
+
+            const windowElement = document.createElement('div');
+            windowElement.className = 'tip-window';
+            
+            // 随机选择提示语和背景颜色
+            const tip = tips[Math.floor(Math.random() * tips.length)];
+            const bgColor = bgColors[Math.floor(Math.random() * bgColors.length)];
+            
+            windowElement.classList.add(`bg-${bgColor}`);
+            windowElement.innerHTML = `<div class="tip-content">${tip}</div>`;
+            
+            // 随机位置
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const x = Math.random() * (screenWidth - 400) + 50;
+            const y = Math.random() * (screenHeight - 200) + 50;
+            
+            windowElement.style.left = `${x}px`;
+            windowElement.style.top = `${y}px`;
+            
+            // 点击窗口关闭所有
+            windowElement.addEventListener('click', closeAllWindows);
+            
+            document.body.appendChild(windowElement);
+            batchWindows.push(windowElement);
+
+            // 延迟创建下一个窗口，形成连续出现的效果
+            setTimeout(() => {
+                createBatchWindows(count - 1);
+            }, 100);
+        }
+
+        function closeAllWindows() {
+            // 移除所有批量提示窗口
+            batchWindows.forEach(window => {
+                if (window.parentNode) {
+                    window.parentNode.removeChild(window);
+                }
+            });
+            batchWindows = [];
+            
+            // 隐藏关闭提示
+            const closeHint = document.getElementById('closeHint');
+            closeHint.style.display = 'none';
+            
+            // 重新显示初始提示窗口
+            const singleTip = document.getElementById('single-tip');
+            singleTip.style.display = 'flex';
+        }
+
+        // ESC键关闭所有窗口
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAllWindows();
+            }
+        });
+
+        // 点击背景也可以关闭（但不要误关初始窗口）
+        document.addEventListener('click', function(event) {
+            if (event.target === document.body) {
+                closeAllWindows();
+            }
+        });
+    </script>
+</body>
+</html>
